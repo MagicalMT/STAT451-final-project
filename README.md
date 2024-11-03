@@ -2,7 +2,8 @@
 
 Group Members: Simon Xiong, Gefei Shen, Xuhao Wang, Tao Zhang
 
-    | Field                  | Description                                                           |
+```markdown
+| Field                  | Description                                                           |
 |------------------------|-----------------------------------------------------------------------|
 | **userID**             | Unique identifier assigned to each user                               |
 | **Device model**       | The model name (e.g iPhone)                                           |
@@ -15,3 +16,4 @@ Group Members: Simon Xiong, Gefei Shen, Xuhao Wang, Tao Zhang
 | **Age**                | Age of the user                                                       |
 | **Gender**             | Gender of the user (Male or Female)                                   |
 | **User Behavior Class**| Classification of user behavior based on usage patterns (1 to 5)       |
+```
