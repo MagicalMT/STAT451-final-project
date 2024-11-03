@@ -4,6 +4,7 @@ Group Members: Simon Xiong, Gefei Shen, Xuhao Wang, Tao Zhang
 
 ```markdown
 | Field                  | Description                                                           |
+| --- | --- |
 |------------------------|-----------------------------------------------------------------------|
 | **userID**             | Unique identifier assigned to each user                               |
 | **Device model**       | The model name (e.g iPhone)                                           |
