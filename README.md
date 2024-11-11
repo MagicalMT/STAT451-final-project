@@ -42,6 +42,6 @@ Some data exploration: in this data set, device model, operating system, age, ge
    - **Potential Visualization:** Use a Box Plot to display the distribution of app usage time among various age groups, allowing for easy comparison of usage patterns.
 
 5. **Is the use of different device models or operating systems correlated with the length of screen usage or the number of apps installed?**  
-   - **Potential Visualization:** Use a Correlation Matrix Plot to analyze the relationship between device model/OS type and screen usage or app count.
+   - **Potential Visualization:** Use a Correlation Matrix Plot to analyze the relationship between device model/OS type and screen usage or app count. 
 
 
