@@ -36,7 +36,7 @@ os_counts <- data %>%
   mutate(Percentage = Count / sum(Count) * 100) %>%
   ungroup()
 
-# Create pie chart with percentage labels for each age group
+# pie chart with percentage labels for each age group
 ggplot(os_counts, aes(x = "", y = Percentage, fill = Operating.System)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y") +
