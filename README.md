@@ -6,8 +6,8 @@
 |--------------|------------------|
 | Simon Xiong  | MagicalMT        |
 | Gefei Shen   | iefegensh        |
-| Xuhao Wang   | TaoZhang111      |
-| Tao Zhang    | Xuhaow2          |
+| Xuhao Wang   | Xuhaow2          |
+| Tao Zhang    | TaoZhang111      |
 
 ## Summary:
 With smartphones being one of the most important carry-alls in modern times (especially for young people), we wanted to find out if different types, number of apps installed, and other variations would have an impact on our usage habits.
