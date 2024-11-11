@@ -50,6 +50,11 @@ Some data exploration: in this data set, device model, operating system, age, ge
 5. **Is the use of different device models or operating systems correlated with the length of screen usage or the number of apps installed?**  
    - **Potential Visualization:** Use a Correlation Matrix Plot to analyze the relationship between device model/OS type and screen usage or app count. 
 
-## Question 1 What is the preferred operating system for each age group?
+## Question 1: What is the preferred operating system for each age group?
 ![Operating System Preference by Age Group](https://github.com/MagicalMT/STAT451-final-project/blob/main/p1.png)
 This chart shows the preference for operating systems (Android and iOS) by age group, revealing the proportion of users in each age group who use the different systems. As can be seen from the chart, Android dominates across all age groups, with the percentage of users ranging between 78% and 80%, demonstrating dominance. In contrast, iOS has a lower percentage of users, holding steady at around 20 per cent.In terms of age groups, although iOS has seen a small rise in the older 49-60 age group (to 22 per cent), overall this change has not altered the dominance of Android across all age groups. There is a general preference for Android across all age groups, with Android particularly favoured in the younger to middle age group (18-48).The pie chart is particularly suitable for this visualization because it clearly illustrates the proportion of users for each operating system within each age group. The different colors here perfectly distinguish two OS.
+
+## Question 2:How does screen time vary by different age groups?
+![](https://github.com/MagicalMT/STAT451-final-project/blob/main/p23.png)
+In this plot, the x-axis represents the age of the user, and the y-axis shows the average screen usage time (in hours per day). The red and blue dots represent individual observations of screen usage time for females and males at different ages, respectively. Each dot indicates the average screen time for a specific gender at a particular age.In this plot, we use a smooth curve to display the overall trend to give audience a better and more intuitive comparison. We can observe a peak in screen usage time for males around 50 years old, while for females, there is a peak around 35 years old. Otherwise, the average screen usage time is similar for both genders. We use line plot here because it emphasizes the trend over ages groups
+
