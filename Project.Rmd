@@ -14,60 +14,45 @@ library(corrplot)
 ```
 
 
-
 ```{r}
-data <- read.csv("C:/Users/86130/Desktop/STAT451/Final_project/user_behavior_dataset.csv")
+data <- read.csv("user_behavior_dataset.csv")
 
 ```
 
 
-
-
-
-
-
-
-
-
-### Question 1: What are the number of device models across different age groups?
-
-
-
+### Question 1: What is the preferred operating system for each age group?
 
 
 ```{r}
-data$Age_Group <- cut(data$Age, breaks = c(18, 28, 38, 48, 60, Inf), labels = c("18-28", "29-38", "39-48", "49-60", "60+"), right = FALSE)
+# Define age groups
+data$Age_Group <- cut(data$Age, breaks = c(18, 28, 38, 48, 60, Inf), 
+                      labels = c("18-28", "29-38", "39-48", "49-60", "60+"), right = FALSE)
 
-device_counts <- data %>%
+# Calculate the count and percentage of each operating system within each age group
+os_counts <- data %>%
+  group_by(Age_Group, Operating.System) %>%
+  summarise(Count = n()) %>%
   group_by(Age_Group) %>%
-  summarise(Device_Model_Count = n_distinct(Device.Model))
+  mutate(Percentage = Count / sum(Count) * 100) %>%
+  ungroup()
 
-ggplot(device_counts, aes(x = "", y = Device_Model_Count, fill = Age_Group)) +
+# Create pie chart with percentage labels for each age group
+ggplot(os_counts, aes(x = "", y = Percentage, fill = Operating.System)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y") +
-  labs(title = "Number of Device Models Across Different Age Groups") +
+  facet_wrap(~ Age_Group) +
+  labs(title = "Preferred Operating Systems by Age Group (Percentage)",
+       fill = "Operating System") +
   theme_void() +
-  theme(legend.position = "right")
-
-# Count unique device models per individual age
-device_counts <- data %>%
-  filter(Age >= 18, Age <= 60) %>%
-  group_by(Age) %>%
-  summarize(UniqueDeviceModels = n_distinct(Device.Model))
-
-# Create the line plot
-ggplot(device_counts, aes(x = Age, y = UniqueDeviceModels)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Unique Device Models by Age",
-       x = "Age",
-       y = "Number of Unique Device Models") +
-  theme_minimal()
+  theme(legend.position = "right") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%")), 
+            position = position_stack(vjust = 0.5))
 ```
-The data grouped users by age categories (0-18, 19-30, 31-45, 46-60) and counted the distinct device models per age group. The information is visualized as a pie chart representing each age group and the number of device models they use.This appears to be a very uniform data set, and after that, our group looked at the sources of this data set and it seemed to be evenly distributed according to the age interval
 
-Then we looked at the discounted statistical graph, and the distribution of this age was also very uniform, with a maximum error of two and a minimum error of one for each age group. It stays between 4+-1
 
+This chart shows the preference for operating systems (Android and iOS) by age group, revealing the proportion of users in each age group who use the different systems. As can be seen from the chart, Android dominates across all age groups, with the percentage of users ranging between 78% and 80%, demonstrating dominance. In contrast, iOS has a lower percentage of users, holding steady at around 20 per cent.
+
+In terms of age groups, although iOS has seen a small rise in the older 49-60 age group (to 22 per cent), overall this change has not altered the dominance of Android across all age groups. There is a general preference for Android across all age groups, with Android particularly favoured in the younger to middle age group (18-48).
 
 
 
@@ -117,7 +102,7 @@ ggplot(screen_time_individual, aes(x = Age, y = Average_Screen_On_Time, color = 
 ```
 
 
-
+In this plot, the x-axis represents the age of the user, and the y-axis shows the average screen usage time (in hours per day). The red and blue dots represent individual observations of screen usage time for females and males at different ages, respectively. Each dot indicates the average screen time for a specific gender at a particular age.In this plot, we use a smooth curve to display the overall trend to give audience a better and more intuitive comparion. We can observe a peak in screen usage time for males around 50 years old, while for females, there is a peak around 35 years old. Otherwise, the average screen usage time is similar for both genders.
 
 
 
@@ -137,7 +122,16 @@ corrplot(correlation_matrix, method = "color", type = "upper", tl.srt = 45,
          addCoef.col = "red")
 
 ```
-This correlation matrix reveals strong interconnections between app usage time, screen-on time, and the number of apps installed. Specifically, app usage time has a very high positive correlation with both screen-on time and the number of apps installed, indicating that users who install more apps tend to spend more time using them and consequently keep their screens on longer. However, age shows almost no correlation with these variables, I think this is due to the fact that the data set was not sampled randomly, but the average of all ages was asked.
+
+
+Based on question 2, we want to further explore the relationship between screen using time and number of apps. This correlation matrix reveals strong interconnections between app usage time, screen-on time, and the number of apps installed. Specifically, app usage time has a very high positive correlation with both screen-on time and the number of apps installed, indicating that users who install more apps tend to spend more time using them and consequently keep their screens on longer. However, age shows almost no correlation with these variables, I think this is due to the fact that the data set was not sampled randomly, but the average of all ages was asked.
+
+
+
+
+
+
+
 
 
 
