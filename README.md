@@ -1,10 +1,16 @@
 # STAT451-final-project
 
-Group Members: Simon Xiong, Gefei Shen, Xuhao Wang, Tao Zhang
+## Group Members
 
-Summary:
+| Name         | GitHub Username |
+|--------------|------------------|
+| Simon Xiong  | MagicalMT        |
+| Gefei Shen   | iefegensh        |
+| Xuhao Wang   | TaoZhang111      |
+| Tao Zhang    | Xuhaow2          |
+
+## Summary:
 With smartphones being one of the most important carry-alls in modern times (especially for young people), we wanted to find out if different types, number of apps installed, and other variations would have an impact on our usage habits.
-
 
 ## Data Source
 
@@ -29,7 +35,7 @@ With smartphones being one of the most important carry-alls in modern times (esp
 Some data exploration: in this data set, device model, operating system, age, gender and user behavior class are the categorical variables. userID, App Usage time, Screen on Time, Battery Drain, Number of Apps Installed, Data Usage are the numerical variables.  
 
 ## Analysis Questions
-1. **What are the number of device models across different age groups?**  
+1. **What is the preferred operating system for each age group?**  
    - **Potential Visualization:** Use a pie chart with different sections representing various age groups to show the distribution of device models among different age ranges.
 
 2. **How does screen time vary by different age groups?**  
