@@ -3,191 +3,164 @@ title: "Project"
 author: "TaoZhang, Gefei Shen, Xuhao Wang, simon xiong"
 date: "2024-11-10"
 output: html_document
+runtime: shiny
 ---
 
-```{r}
-library(dplyr)
-library(ggplot2)
-library(reshape2)
-library(corrplot)
-library(ggcorrplot)
+```{r, echo=FALSE}
+suppressPackageStartupMessages({
+  library(shiny)
+  library(dplyr)
+  library(ggplot2)
+  library(reshape2)
+  library(corrplot)
+  library(ggcorrplot)
+})
 ```
 
-
-```{r}
+```{r, echo=FALSE}
 data <- read.csv("user_behavior_dataset.csv")
 
+# Define UI
+ui <- fluidPage(
+  titlePanel("User Behavior Analysis Dashboard"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("ageGroup", "Select Age Group for Analysis:", 
+                  choices = c("18-28", "29-38", "39-48", "49-60", "60+")),
+      selectInput("gender", "Select Gender for Screen Time Analysis:",
+                  choices = c("Male", "Female", "Both")),
+      checkboxInput("showCorr", "Show Correlation Matrix", value = FALSE)
+    ),
+    
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Operating System Preference", 
+                 plotOutput("osPreference")),
+        tabPanel("Screen Time by Age Group", 
+                 plotOutput("screenTimeByAge"),
+                 plotOutput("screenTimeByAgeSmoothed")),
+        tabPanel("App Usage and Screen Time Correlation", 
+                 plotOutput("corrMatrix"),
+                 conditionalPanel(
+                   condition = "input.showCorr == true",
+                   plotOutput("heatMap")
+                 )),
+        tabPanel("App Usage Time Distribution", 
+                 plotOutput("appUsageBoxplot")),
+        tabPanel("Fake Dataset Validation", 
+                 plotOutput("distributionPlot"),
+                 plotOutput("scatterPlot"))
+      )
+    )
+  )
+)
+
+# Define Server
+server <- function(input, output, session) {
+  # Prepare data for Operating System Preference
+  data$Age_Group <- cut(data$Age, breaks = c(18, 28, 38, 48, 60, Inf), 
+                        labels = c("18-28", "29-38", "39-48", "49-60", "60+"), right = FALSE)
+  
+  os_counts <- data %>%
+    group_by(Age_Group, Operating.System) %>%
+    summarise(Count = n()) %>%
+    group_by(Age_Group) %>%
+    mutate(Percentage = Count / sum(Count) * 100) %>%
+    ungroup()
+  
+  output$osPreference <- renderPlot({
+    ggplot(os_counts %>% filter(Age_Group == input$ageGroup), 
+           aes(x = "", y = Percentage, fill = Operating.System)) +
+      geom_bar(stat = "identity", width = 1) +
+      coord_polar("y") +
+      labs(title = paste("Preferred Operating Systems for Age Group:", input$ageGroup),
+           fill = "Operating System") +
+      theme_void() +
+      theme(legend.position = "right") +
+      geom_text(aes(label = paste0(round(Percentage, 1), "%")), 
+                position = position_stack(vjust = 0.5))
+  })
+  
+  # Screen Time Analysis
+  screen_time <- data %>%
+    group_by(Age_Group, Gender) %>%
+    summarise(Average_Screen_Time = mean(Screen.On.Time..hours.day., na.rm = TRUE), .groups = "drop")
+  
+  output$screenTimeByAge <- renderPlot({
+    ggplot(screen_time, aes(x = Age_Group, y = Average_Screen_Time, color = Gender, group = Gender)) +
+      geom_line() +
+      geom_point() +
+      labs(title = "Screen Time by Age Group and Gender",
+           x = "Age Group",
+           y = "Average Screen On Time (hours/day)") +
+      theme_minimal()
+  })
+  
+  screen_time_individual <- data %>%
+    group_by(Age, Gender) %>%
+    summarise(Average_Screen_On_Time = mean(Screen.On.Time..hours.day., na.rm = TRUE), .groups = "drop")
+  
+  output$screenTimeByAgeSmoothed <- renderPlot({
+    ggplot(screen_time_individual, aes(x = Age, y = Average_Screen_On_Time, color = Gender, group = Gender)) +
+      geom_point(alpha = 0.6) +
+      geom_smooth(method = "loess", span = 0.3, se = FALSE) +
+      scale_color_manual(values = c("Male" = "blue", "Female" = "red")) +
+      labs(title = "Smoothed Screen Time Trend by Age and Gender",
+           x = "Age",
+           y = "Average Screen On Time (hours/day)") +
+      theme_minimal()
+  })
+  
+  # Correlation Matrix
+  correlation_data <- data %>%
+    select(App.Usage.Time..min.day., Screen.On.Time..hours.day., Number.of.Apps.Installed, Age)
+  
+  correlation_matrix <- cor(correlation_data, use = "complete.obs")
+  
+  output$corrMatrix <- renderPlot({
+    corrplot(correlation_matrix, method = "color", type = "upper", tl.srt = 45,
+             title = "Correlation Matrix",
+             addCoef.col = "red")
+  })
+  
+  output$heatMap <- renderPlot({
+    ggcorrplot(correlation_matrix, method = "circle", type = "lower", lab = TRUE, lab_size = 3,
+               title = "Correlation Heatmap", 
+               colors = c("blue", "white", "red"))
+  })
+  
+  # App Usage Distribution
+  output$appUsageBoxplot <- renderPlot({
+    ggplot(data, aes(x = Age_Group, y = App.Usage.Time..min.day.)) +
+      geom_boxplot(fill = "lightblue", color = "darkblue") +
+      labs(title = "Distribution of App Usage Time Across Age Groups",
+           x = "Age Group",
+           y = "Daily App Usage Time (minutes)") +
+      theme_minimal()
+  })
+  
+  # Fake Dataset Validation
+  output$distributionPlot <- renderPlot({
+    ggplot(data, aes(x = App.Usage.Time..min.day.)) +
+      geom_histogram(binwidth = 30, fill = "lightblue", color = "darkblue") +
+      labs(title = "Distribution of App Usage Time", 
+           x = "Daily App Usage Time (minutes)", 
+           y = "Frequency") +
+      theme_minimal()
+  })
+  
+  output$scatterPlot <- renderPlot({
+    ggplot(data, aes(x = Number.of.Apps.Installed, y = App.Usage.Time..min.day.)) +
+      geom_point(alpha = 0.6, color = "blue") +
+      labs(title = "App Usage Time vs Number of Apps Installed", 
+           x = "Number of Apps Installed", 
+           y = "Daily App Usage Time (minutes)") +
+      theme_minimal()
+  })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
 ```
-
-
-### Question 1: What is the preferred operating system for each age group?
-
-
-```{r}
-# Define age groups
-data$Age_Group <- cut(data$Age, breaks = c(18, 28, 38, 48, 60, Inf), 
-                      labels = c("18-28", "29-38", "39-48", "49-60", "60+"), right = FALSE)
-
-# Calculate the count and percentage of each operating system within each age group
-os_counts <- data %>%
-  group_by(Age_Group, Operating.System) %>%
-  summarise(Count = n()) %>%
-  group_by(Age_Group) %>%
-  mutate(Percentage = Count / sum(Count) * 100) %>%
-  ungroup()
-
-# Create pie chart with percentage labels for each age group
-ggplot(os_counts, aes(x = "", y = Percentage, fill = Operating.System)) +
-  geom_bar(stat = "identity", width = 1) +
-  coord_polar("y") +
-  facet_wrap(~ Age_Group) +
-  labs(title = "Preferred Operating Systems by Age Group (Percentage)",
-       fill = "Operating System") +
-  theme_void() +
-  theme(legend.position = "right") +
-  geom_text(aes(label = paste0(round(Percentage, 1), "%")), 
-            position = position_stack(vjust = 0.5))
-```
-
-
-This chart shows the preference for operating systems (Android and iOS) by age group, revealing the proportion of users in each age group who use the different systems. As can be seen from the chart, Android dominates across all age groups, with the percentage of users ranging between 78% and 80%, demonstrating dominance. In contrast, iOS has a lower percentage of users, holding steady at around 20 per cent.
-
-In terms of age groups, although iOS has seen a small rise in the older 49-60 age group (to 22 per cent), overall this change has not altered the dominance of Android across all age groups. There is a general preference for Android across all age groups, with Android particularly favoured in the younger to middle age group (18-48).
-
-
-
-### Question 2: How does screen time vary by different age groups?
-
-```{r}
-screen_time <- data %>%
-  group_by(Age_Group, Gender) %>%
-  summarise(Average_Screen_Time = mean(Screen.On.Time..hours.day., na.rm = TRUE), .groups = "drop")
-
-
-ggplot(screen_time, aes(x = Age_Group, y = Average_Screen_Time, color = Gender, group = Gender)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Screen Time by Age Group and Gender",
-       x = "Age Group",
-       y = "Average Screen On Time (hours/day)") +
-  theme_minimal()
-
-
-screen_time_individual <- data %>%
-  group_by(Age) %>%
-  summarise(Average_Screen_On_Time = mean(Screen.On.Time..hours.day., na.rm = TRUE))
-
-# Plot the average screen time by age
-ggplot(screen_time_individual, aes(x = Age, y = Average_Screen_On_Time)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Average Screen On Time by Age",
-       x = "Age",
-       y = "Average Screen On Time (hours/day)") +
-  theme_minimal()
-
-screen_time_individual <- data %>%
-  group_by(Age, Gender) %>%
-  summarise(Average_Screen_On_Time = mean(Screen.On.Time..hours.day., na.rm = TRUE), .groups = "drop")
-
-# Plot the average screen time by age, with a smoothed curve
-ggplot(screen_time_individual, aes(x = Age, y = Average_Screen_On_Time, color = Gender, group = Gender)) +
-  geom_point() +  # Points for each age
-  geom_smooth(method = "loess", span = 0.3, se = FALSE) +  # Smooth line with LOESS
-  scale_color_manual(values = c("Male" = "blue", "Female" = "red")) +
-  labs(title = "Average Screen On Time by Age and Gender (Smoothed)",
-       x = "Age",
-       y = "Average Screen On Time (hours/day)") +
-  theme_minimal()
-```
-
-
-In this plot, the x-axis represents the age of the user, and the y-axis shows the average screen usage time (in hours per day). The red and blue dots represent individual observations of screen usage time for females and males at different ages, respectively. Each dot indicates the average screen time for a specific gender at a particular age.In this plot, we use a smooth curve to display the overall trend to give audience a better and more intuitive comparion. We can observe a peak in screen usage time for males around 50 years old, while for females, there is a peak around 35 years old. Otherwise, the average screen usage time is similar for both genders.
-
-
-
-
-
-### Question 3: Does the amount of time spent on the phone daily correlate with the number of apps in that person's phone?
-
-
-```{r}
-correlation_data <- data %>%
-  select(App.Usage.Time..min.day., Screen.On.Time..hours.day., Number.of.Apps.Installed, Age)
-
-correlation_matrix <- cor(correlation_data, use = "complete.obs")
-
-corrplot(correlation_matrix, method = "color", type = "upper", tl.srt = 45,
-         title = "Correlation Matrix for Screen Time, App Usage, and Number of Apps Installed",
-         addCoef.col = "red")
-
-```
-
-
-Based on question 2, we want to further explore the relationship between screen using time and number of apps. This correlation matrix reveals strong interconnections between app usage time, screen-on time, and the number of apps installed. Specifically, app usage time has a very high positive correlation with both screen-on time and the number of apps installed, indicating that users who install more apps tend to spend more time using them and consequently keep their screens on longer. However, age shows almost no correlation with these variables, I think this is due to the fact that the data set was not sampled randomly, but the average of all ages was asked.
-
-
-### Question 4
-```{r}
-data$Age_Group <- cut(data$Age, breaks = c(18, 28, 38, 48, 60, Inf), 
-                      labels = c("18-28", "29-38", "39-48", "49-60", "60+"), right = FALSE)
-
-ggplot(data, aes(x = Age_Group, y = App.Usage.Time..min.day.)) +
-  geom_boxplot(fill = "lightblue", color = "darkblue") + # Box plot with colors
-  labs(title = "Distribution of App Usage Time Across Age Groups",
-       x = "Age Group",
-       y = "Daily App Usage Time (minutes)") +
-  theme_minimal()
-
-```
-
-
-
-
-### Question5: Is the use of different device models operating systems correlated with the length of screen usage? Or the number of apps installed?
-
-```{r}
-correlation_data <- data[, c("Screen.On.Time..hours.day.", 
-                             "App.Usage.Time..min.day.", 
-                             "Number.of.Apps.Installed", 
-                             "Battery.Drain..mAh.day.", 
-                             "Data.Usage..MB.day.")]
-
-# Calculate the correlation matrix
-correlation_matrix <- cor(correlation_data, use = "complete.obs")
-
-# Plot the correlation matrix as a heatmap
-ggcorrplot(correlation_matrix, 
-           method = "circle",       # Use circle method for visualization
-           type = "lower",          # Show only the lower triangle
-           lab = TRUE,              # Display correlation values
-           lab_size = 3,            # Adjust label size
-           title = "Correlation Matrix of Screen Time and Device Variables", 
-           colors = c("blue", "white", "red")) # Blue for negative, red for positive correlations
-
-ggplot(data, aes(x = Operating.System, y = App.Usage.Time..min.day., fill = Operating.System)) +
-  geom_boxplot() +
-  labs(title = "App Usage Time by Operating System", 
-       x = "Operating System", 
-       y = "Daily App Usage Time (minutes)") +
-  theme_minimal()
-```
-
-### Question 6: Is this is not a fake dataset
-```{r}
-ggplot(data, aes(x = App.Usage.Time..min.day.)) +
-  geom_histogram(binwidth = 30, fill = "lightblue", color = "darkblue") + # Set bin size and colors
-  labs(title = "Distribution of App Usage Time", 
-       x = "Daily App Usage Time (minutes)", 
-       y = "Frequency") +
-  theme_minimal()
-
-ggplot(data, aes(x = Number.of.Apps.Installed, y = App.Usage.Time..min.day.)) +
-  geom_point(alpha = 0.6, color = "blue") +
-  labs(title = "App Usage Time vs Number of Apps Installed", 
-       x = "Number of Apps Installed", 
-       y = "Daily App Usage Time (minutes)") +
-  theme_minimal()
-```
-
 
