@@ -23,7 +23,7 @@ server <- function(input, output, session) {
     right = FALSE
   )
   
-  ## ----- Question 1 -----
+  ## Question 1
   observe({
     age_groups <- unique(data$Age_Group)
     updateSelectInput(session, "age_group", choices = age_groups, selected = age_groups[1])
@@ -47,7 +47,7 @@ server <- function(input, output, session) {
                 position = position_stack(vjust = 0.5))
   })
   
-  ## ----- Question 2 -----
+  ## Question 2
   output$screen_time_plot <- renderPlot({
     if (input$gender_q2 == "Both (Combined)") {
       screen_time_combined <- data %>%
@@ -89,7 +89,7 @@ server <- function(input, output, session) {
     }
   })
   
-  ## ----- Question 3 -----
+  ## Question 3
   observe({
     variable_choices <- colnames(data)[sapply(data, is.numeric)]
     updateSelectInput(session, "vars_q3", choices = variable_choices, selected = variable_choices[1:3])
@@ -109,7 +109,7 @@ server <- function(input, output, session) {
     )
   })
   
-  ## ----- Question 4 -----
+  ## Question 4
   observe({
     age_groups <- unique(data$Age_Group)
     updateSelectInput(session, "age_groups_q4", choices = age_groups, selected = age_groups)
@@ -129,7 +129,7 @@ server <- function(input, output, session) {
       theme_minimal()
   })
   
-  ## ----- Question 5 -----
+  ## Question 5
   observe({
     os_choices <- c("All", unique(data$Operating.System))
     updateSelectInput(session, "os_q5", choices = os_choices, selected = "All")
@@ -154,7 +154,7 @@ server <- function(input, output, session) {
       theme(legend.position = "none")
   })
   
-  ## ----- Question 6 -----
+  ## Question 6
   observe({
     os_choices <- c("All", unique(data$Operating.System))
     updateSelectInput(session, "os_q6", choices = os_choices, selected = "All")
