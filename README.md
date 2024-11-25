@@ -64,3 +64,6 @@ In this plot, the x-axis represents the age of the user, and the y-axis shows th
 Based on question 2, we want to further explore the relationship between screen using time and number of apps. This correlation matrix reveals strong interconnections between app usage time, screen-on time, and the number of apps installed. Specifically, app usage time has a very high positive correlation with both screen-on time and the number of apps installed, indicating that users who install more apps tend to spend more time using them and consequently keep their screens on longer. However, age shows almost no correlation with these variables, I think this is due to the fact that the data set was not sampled randomly, but the average of all ages was asked. We use a correlation matrix plot here because it provides a clear overview of the correlation between multiple variables in a single visualization. 
 
 
+# Shiny Usage
+1. All files use the relative path, so please feel free to just run server.R
+2. In this shiny app, we have six interactive features. You can choose any of them. Each of them will have some basic description and our analysis.
