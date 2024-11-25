@@ -73,25 +73,29 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         id = "tabselected",
-        tabPanel("Operating System Distribution by Age Group", 
+        tabPanel("Question 1: What is the distribution of operating systems by age group?", 
                  value = 1, 
-                 plotOutput("os_by_age_group")),
-        tabPanel("Average Screen On Time by Age", 
+                 plotOutput("os_by_age_group"),
+                 textOutput("os_analysis")),
+        tabPanel("Question 2: How does average screen on time vary by age?", 
                  value = 2, 
-                 plotOutput("screen_time_plot")),
-        tabPanel("Correlation Analysis: App Usage Time vs Number of Apps", 
+                 plotOutput("screen_time_plot"),
+                 textOutput("screen_time_analysis")),
+        tabPanel("Question 3: Is there a correlation between app usage time and the number of apps installed?", 
                  value = 3, 
-                 plotOutput("correlation_plot")),
-        tabPanel("Distribution of App Usage Time Across Age Groups", 
+                 plotOutput("correlation_plot"),
+                 textOutput("correlation_analysis")),
+        tabPanel("Question 4: How is app usage time distributed across different age groups?", 
                  value = 4, 
                  plotOutput("app_usage_boxplot")),
-        tabPanel("Screen On Time by Operating System", 
+        tabPanel("Question 5: How does screen on time differ by operating system?", 
                  value = 5, 
                  plotOutput("screen_time_os")),
-        tabPanel("App Usage Analysis: Frequency and Number of Apps Installed", 
+        tabPanel("Question 6: What is the relationship between app usage time and the number of apps installed?", 
                  value = 6, 
                  plotOutput("app_usage_hist"), 
                  plotOutput("app_usage_scatter"))
+        
       )
     )
   )

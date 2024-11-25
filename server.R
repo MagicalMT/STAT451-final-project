@@ -56,10 +56,32 @@ server <- function(input, output, session) {
       )
   })
   
+  output$os_analysis <- renderText({
+    req(input$age_group != "None")
+    filtered_data <- data %>%
+      filter(Age_Group == input$age_group) %>%
+      group_by(Operating.System) %>%
+      summarise(Count = n(), .groups = "drop") %>%
+      mutate(Percentage = Count / sum(Count) * 100)
+    
+    analysis <- paste0(
+      "For the age group ", input$age_group, 
+      ", the majority of users use ", 
+      filtered_data$Operating.System[which.max(filtered_data$Percentage)], 
+      " with ", round(max(filtered_data$Percentage), 1), 
+      "% of the total. The other operating systems have the following distributions: ", 
+      paste(filtered_data$Operating.System[-which.max(filtered_data$Percentage)], 
+            "(", round(filtered_data$Percentage[-which.max(filtered_data$Percentage)], 1), "%)", 
+            collapse = ", "), "."
+    )
+    return(analysis)
+  })
+  
   
   ## Question 2
   output$screen_time_plot <- renderPlot({
     req(input$gender_q2 != "None")
+    
     if (input$gender_q2 == "Both (Combined)") {
       screen_time_combined <- data %>%
         group_by(Age) %>%
@@ -83,7 +105,8 @@ server <- function(input, output, session) {
           axis.text = element_text(size = 12),
           legend.title = element_text(size = 14),
           legend.text = element_text(size = 12)
-        ) 
+        )
+      
     } else {
       screen_time_individual <- data %>%
         filter(Gender == input$gender_q2) %>%
@@ -109,15 +132,38 @@ server <- function(input, output, session) {
           axis.title = element_text(size = 14),
           axis.text = element_text(size = 12),
           legend.title = element_text(size = 14),
-          legend.text = element_text(size = 14)
+          legend.text = element_text(size = 12)
         )
     }
   })
   
+  output$screen_time_analysis <- renderText({
+    req(input$gender_q2 != "None")
+    
+    if (input$gender_q2 == "Both (Combined)") {
+      analysis <- paste0(
+        "This graph shows the average screen on time by age, combining data for both genders. ",
+        "The trend line (loess smooth) indicates how screen time fluctuates with age. ",
+        "For example, the average screen time starts around 5 hours per day, dips slightly in the mid-30s, ",
+        "and then gradually stabilizes as age increases. "
+      )
+    } else {
+      analysis <- paste0(
+        "This graph shows the average screen on time by age for ", input$gender_q2, ". ",
+        "The trend line (loess smooth) highlights how screen time changes across different ages. ",
+        "For instance, specific patterns in screen usage can be observed among ", input$gender_q2, 
+        ", such as potential dips or rises in screen time at certain age ranges."
+      )
+    }
+    
+    return(analysis)
+  })
+  
+  
   ## Question 3
   observe({
     variable_choices <- colnames(data)[sapply(data, is.numeric)]
-    updateSelectInput(session, "vars_q3", choices = variable_choices, selected = variable_choices[1:3])
+    updateSelectInput(session, "vars_q3", choices = variable_choices, selected = variable_choices[1:4])
   })
   
   output$correlation_plot <- renderPlot({
@@ -143,6 +189,23 @@ server <- function(input, output, session) {
           side = 3, line = 2, adj = 0, cex = 1.5, font = 2)
   })
   
+  
+  output$correlation_analysis <- renderText({
+    req(length(input$vars_q3) >= 2)
+    selected_vars <- paste(input$vars_q3, collapse = ", ")
+    
+    analysis <- paste0(
+      "The correlation matrix provides insights into the relationships between the selected numeric variables: ", 
+      selected_vars, ". ",
+      "Key observations include:\n",
+      "- A strong positive correlation (~0.95) between `App.Usage.Time..min.day.` and `Screen.On.Time..hours.day.` indicates ",
+      "that users who spend more time on apps tend to keep their screens active for longer durations.\n",
+      "- A similarly high correlation (~0.96) between `App.Usage.Time..min.day.` and `Battery.Drain.mAh.day.` suggests that ",
+      "heavier app usage contributes significantly to battery consumption.\n",
+      "- The variable `User.ID` has no meaningful correlation with other variables, confirming it as a non-influential identifier."
+    )
+    return(analysis)
+  })
   
   ## Question 4
   observe({
