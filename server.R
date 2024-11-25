@@ -194,15 +194,15 @@ server <- function(input, output, session) {
     req(length(input$vars_q3) >= 2)
     selected_vars <- paste(input$vars_q3, collapse = ", ")
     
-    analysis <- paste0(
-      "The correlation matrix provides insights into the relationships between the selected numeric variables: ", 
-      selected_vars, ". ",
-      "Key observations include:\n",
-      "- A strong positive correlation (~0.95) between `App.Usage.Time..min.day.` and `Screen.On.Time..hours.day.` indicates ",
-      "that users who spend more time on apps tend to keep their screens active for longer durations.\n",
-      "- A similarly high correlation (~0.96) between `App.Usage.Time..min.day.` and `Battery.Drain.mAh.day.` suggests that ",
-      "heavier app usage contributes significantly to battery consumption.\n",
-      "- The variable `User.ID` has no meaningful correlation with other variables, confirming it as a non-influential identifier."
+    analysis <- paste(
+      "This correlation matrix reveals strong interconnections between app usage time, screen-on time, ",
+      "and the number of apps installed. Specifically, app usage time has a very high positive correlation ",
+      "with both screen-on time and the number of apps installed, indicating that users who install more apps ",
+      "tend to spend more time using them and consequently keep their screens on longer. ",
+      "However, age shows almost no correlation with these variables, likely because the dataset was not sampled randomly, ",
+      "but rather represents averages across all age groups. ",
+      "We use a correlation matrix plot here because it provides a clear overview of the correlation ",
+      "between multiple variables in a single visualization."
     )
     return(analysis)
   })
@@ -234,6 +234,24 @@ server <- function(input, output, session) {
       )
   })
   
+  
+  output$q4 <- renderText({
+    req(input$age_groups_q4 != "None")
+    
+    analysis <- paste(
+      "The boxplot illustrates the daily app usage time across different age groups. Interestingly, all the age groups exhibit similar trends in their app usage behavior. Specifically:",
+      "\n1. Median Usage: The median daily app usage time remains consistent across all groups, approximately centered around 200 minutes.",
+      "\n2. Spread of Data: The interquartile range (IQR), representing the middle 50% of the data, is quite comparable for all age groups, indicating that the majority of users in each group have similar app usage habits.",
+      "\n3. Outliers: Outliers appear at both ends of the spectrum, but their presence is consistent across age groups, suggesting similar variations in extreme behaviors.",
+      "\n4. Range: The maximum and minimum values show minimal variation among groups, further reinforcing the observation that app usage patterns do not vary significantly with age."
+    )
+    
+    return(analysis)
+  })
+  
+  
+  
+
   ## Question 5
   observe({
     os_choices <- c("None", "All", unique(data$Operating.System))
@@ -264,6 +282,14 @@ server <- function(input, output, session) {
         legend.title = element_text(size = 14),
         legend.text = element_text(size = 12)
       )
+  })
+  
+  output$screen_time_os_analysis <- renderText({
+    paste(
+      "The boxplot illustrates the distribution of screen-on time for Android and iOS users.",
+      "Both operating systems show a similar median screen-on time, with comparable ranges.",
+      "This suggests that users of Android and iOS devices engage with their screens for approximately equal durations on average."
+    )
   })
   
   ## Question 6
@@ -313,5 +339,18 @@ server <- function(input, output, session) {
         legend.title = element_text(size = 14),
         legend.text = element_text(size = 12)
       )
+  })
+  
+  output$app_usage_analysis <- renderText({
+    req(input$os_q6 != "None")
+    analysis <- paste(
+      "For the all category, we can find this scatterplot illustrates the relationship between 'daily app usage' and the 'number of installed apps.' ",
+      "However, the data displays an unusually consistent stepwise pattern, which is highly irregular in real-world scenarios. ",
+      "This uniform distribution suggests that the dataset may not represent actual user behavior but rather a synthetic dataset intended for demonstration or testing purposes.",
+      "\n\nFurthermore, the absence of noise, irregular fluctuations, or outliers—common in real-world datasets—further strengthens the suspicion that this data is artificially generated. ",
+      "Real-world data typically exhibits variability due to diverse user behaviors, environmental factors, and data collection inconsistencies, all of which appear to be missing in this dataset."
+    )
+    
+    return(analysis)
   })
 }

@@ -14,6 +14,7 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
+      h4("Controls"),
       conditionalPanel(
         condition = "input.tabselected == 1",
         selectInput(
@@ -71,6 +72,10 @@ ui <- fluidPage(
       )
     ),
     mainPanel(
+      tags$div(
+        style = "margin-bottom: 20px;",
+        h4("Questions"),
+      ),
       tabsetPanel(
         id = "tabselected",
         tabPanel("Question 1: What is the distribution of operating systems by age group?", 
@@ -87,15 +92,17 @@ ui <- fluidPage(
                  textOutput("correlation_analysis")),
         tabPanel("Question 4: How is app usage time distributed across different age groups?", 
                  value = 4, 
-                 plotOutput("app_usage_boxplot")),
-        tabPanel("Question 5: How does screen on time differ by operating system?", 
+                 plotOutput("app_usage_boxplot"),
+                 textOutput("q4")),
+        tabPanel("Question 5: Is the use of operating systems correlated with the length of screen usage?", 
                  value = 5, 
-                 plotOutput("screen_time_os")),
-        tabPanel("Question 6: What is the relationship between app usage time and the number of apps installed?", 
+                 plotOutput("screen_time_os"),
+                 textOutput("screen_time_os_analysis")),
+        tabPanel("Question 6: Is this a fake dataset?", 
                  value = 6, 
                  plotOutput("app_usage_hist"), 
-                 plotOutput("app_usage_scatter"))
-        
+                 plotOutput("app_usage_scatter"),
+                 textOutput("app_usage_analysis")),
       )
     )
   )
