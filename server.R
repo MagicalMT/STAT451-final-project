@@ -14,7 +14,7 @@ library(corrplot)
 library(ggcorrplot)
 
 server <- function(input, output, session) {
-  data <- read.csv("../data/user_behavior_dataset.csv")
+  data <- read.csv("./data/user_behavior_dataset.csv")
   
   data$Age_Group <- cut(
     data$Age,
@@ -23,14 +23,16 @@ server <- function(input, output, session) {
     right = FALSE
   )
   
+  
   ## Question 1
   observe({
-    age_groups <- unique(data$Age_Group)
-    updateSelectInput(session, "age_group", choices = age_groups, selected = age_groups[1])
+    age_groups <- c("None",  unique(as.character(data$Age_Group)))
+    updateSelectInput(session, "age_group", choices = age_groups, selected = "None")
   })
   
   output$os_by_age_group <- renderPlot({
-    req(input$age_group)
+    req(input$age_group != "None")  
+    
     filtered_data <- data %>%
       filter(Age_Group == input$age_group) %>%
       group_by(Operating.System) %>%
@@ -40,15 +42,24 @@ server <- function(input, output, session) {
     ggplot(filtered_data, aes(x = "", y = Percentage, fill = Operating.System)) +
       geom_bar(stat = "identity", width = 1) +
       coord_polar("y") +
-      labs(title = paste("Operating System Distribution - Age Group:", input$age_group),
-           fill = "Operating System") +
+      labs(
+        title = paste("Operating System Distribution - Age Group:", input$age_group),
+        fill = "Operating System"
+      ) +
       theme_void() +
       geom_text(aes(label = paste0(round(Percentage, 1), "%")), 
-                position = position_stack(vjust = 0.5))
+                position = position_stack(vjust = 0.5)) +
+      theme(
+        plot.title = element_text(size = 18, face = "bold"),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 12)
+      )
   })
+  
   
   ## Question 2
   output$screen_time_plot <- renderPlot({
+    req(input$gender_q2 != "None")
     if (input$gender_q2 == "Both (Combined)") {
       screen_time_combined <- data %>%
         group_by(Age) %>%
@@ -65,7 +76,14 @@ server <- function(input, output, session) {
           y = "Average Screen On Time (hours/day)",
           color = "Legend"
         ) +
-        theme_minimal()
+        theme_minimal() +
+        theme(
+          plot.title = element_text(size = 18, face = "bold"),
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 12),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 12)
+        ) 
     } else {
       screen_time_individual <- data %>%
         filter(Gender == input$gender_q2) %>%
@@ -85,7 +103,14 @@ server <- function(input, output, session) {
           y = "Average Screen On Time (hours/day)",
           color = "Legend"
         ) +
-        theme_minimal()
+        theme_minimal() +
+        theme(
+          plot.title = element_text(size = 16, face = "bold"),
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 12),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 14)
+        )
     }
   })
   
@@ -98,25 +123,35 @@ server <- function(input, output, session) {
   output$correlation_plot <- renderPlot({
     req(length(input$vars_q3) >= 2)
     correlation_data <- data %>% select(all_of(input$vars_q3))
+    colnames(correlation_data) <- gsub("\\.\\.+", ".", colnames(correlation_data))
+    
     correlation_matrix <- cor(correlation_data, use = "complete.obs")
+    
     corrplot(
       correlation_matrix,
       method = "color",
       type = "upper",
+      tl.col = "black",
+      tl.cex = 1,
       tl.srt = 45,
-      title = "Correlation Matrix",
-      addCoef.col = "red"
+      title = NULL,
+      addCoef.col = "red",
+      number.cex = 0.8
     )
+    
+    mtext("Correlation Matrix: App Usage Time vs Number of Apps", 
+          side = 3, line = 2, adj = 0, cex = 1.5, font = 2)
   })
+  
   
   ## Question 4
   observe({
-    age_groups <- unique(data$Age_Group)
+    age_groups <- c(unique(data$Age_Group))
     updateSelectInput(session, "age_groups_q4", choices = age_groups, selected = age_groups)
   })
   
   output$app_usage_boxplot <- renderPlot({
-    req(input$age_groups_q4)
+    
     filtered_data <- data %>% filter(Age_Group %in% input$age_groups_q4)
     ggplot(filtered_data, aes(x = Age_Group, y = App.Usage.Time..min.day., fill = Age_Group)) +
       geom_boxplot(outlier.color = "red", outlier.shape = 1) +
@@ -126,12 +161,19 @@ server <- function(input, output, session) {
         x = "Age Group",
         y = "Daily App Usage Time (minutes)"
       ) +
-      theme_minimal()
+      theme_minimal() +
+      theme(
+        plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 12)
+      )
   })
   
   ## Question 5
   observe({
-    os_choices <- c("All", unique(data$Operating.System))
+    os_choices <- c("None", "All", unique(data$Operating.System))
     updateSelectInput(session, "os_q5", choices = os_choices, selected = "All")
   })
   
@@ -151,16 +193,24 @@ server <- function(input, output, session) {
         y = "Screen On Time (hours/day)"
       ) +
       theme_minimal() +
-      theme(legend.position = "none")
+      theme(legend.position = "none") +
+      theme(
+        plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 12)
+      )
   })
   
   ## Question 6
   observe({
-    os_choices <- c("All", unique(data$Operating.System))
+    os_choices <- c("None","All", unique(data$Operating.System))
     updateSelectInput(session, "os_q6", choices = os_choices, selected = "All")
   })
   
   output$app_usage_hist <- renderPlot({
+    req(input$os_q6 != "None")
     filtered_data <- if (input$os_q6 != "All") {
       data %>% filter(Operating.System == input$os_q6)
     } else {
@@ -178,6 +228,7 @@ server <- function(input, output, session) {
   })
   
   output$app_usage_scatter <- renderPlot({
+    req(input$os_q6 != "None")
     filtered_data <- if (input$os_q6 != "All") {
       data %>% filter(Operating.System == input$os_q6)
     } else {
@@ -191,6 +242,13 @@ server <- function(input, output, session) {
         x = "App Usage Time (minutes/day)",
         y = "Number of Apps Installed"
       ) +
-      theme_minimal()
+      theme_minimal()+
+      theme(
+        plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 12)
+      )
   })
 }
