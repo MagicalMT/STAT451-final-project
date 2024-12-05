@@ -163,7 +163,7 @@ server <- function(input, output, session) {
   ## Question 3
   observe({
     variable_choices <- colnames(data)[sapply(data, is.numeric)]
-    updateSelectInput(session, "vars_q3", choices = variable_choices, selected = variable_choices[1:4])
+    updateSelectInput(session, "vars_q3", choices = variable_choices, selected = variable_choices[2:5])
   })
   
   output$correlation_plot <- renderPlot({
